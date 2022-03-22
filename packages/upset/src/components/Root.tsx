@@ -49,7 +49,14 @@ export const Root: FC<Props> = ({ data, config, yOffset }) => {
     return null;
 
   return (
-    <>
+    <ProvenanceContext.Provider
+      value={{
+        provenance,
+        actions,
+        isAtLatest: provenance.current.children.length === 0,
+        isAtRoot: provenance.current.id === provenance.root.id,
+      }}
+    >
       <div
         css={css`
           flex: 0 0 auto;
