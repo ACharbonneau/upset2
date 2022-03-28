@@ -1,44 +1,29 @@
-import {
-  getDegreeFromSetMembership,
-  Intersections,
-  Aggregates,
-  areRowsSubsets,
-  Rows,
-  SortBy,
-} from './types';
-import { deepCopy } from './utils';
+import { Aggregate, Aggregates, getDegreeFromSetMembership, Intersections, SortBy, Subset, Subsets } from './types';
+import { isObjectEmpty, objectForEach } from './utils';
 
-function sortByCardinality(rows: Intersections) {
-  const { values, order } = rows;
-  const newOrder = [...order].sort((b, a) => values[a].size - values[b].size);
-
-  return { values, order: newOrder };
+function sortByCardinality(intersections: Intersections) {
+  return Object.values(intersections)
+    .sort((b, a) => a.size - b.size)
+    .map((d) => d.id);
 }
 
-function sortByDegree(rows: Intersections) {
-  const { values, order } = rows;
-  const newOrder = [...order].sort(
-    (a, b) =>
-      getDegreeFromSetMembership(values[a].setMembership) -
-      getDegreeFromSetMembership(values[b].setMembership),
-  );
-
-  return { values, order: newOrder };
+function sortByDegree(intersections: Intersections) {
+  return Object.values(intersections)
+    .sort(
+      (b, a) =>
+        getDegreeFromSetMembership(a.setMembership) -
+        getDegreeFromSetMembership(b.setMembership),
+    )
+    .map((d) => d.id);
 }
 
-function sortByDeviation(rows: Intersections) {
-  const { values, order } = rows;
-  const newOrder = [...order].sort(
-    (a, b) => values[a].deviation - values[b].deviation,
-  );
-
-  return { values, order: newOrder };
+function sortByDeviation(intersections: Intersections) {
+  return Object.values(intersections)
+    .sort((b, a) => a.deviation - b.deviation)
+    .map((d) => d.id);
 }
 
-function sortIntersections<T extends Intersections>(
-  intersection: T,
-  sortBy: SortBy,
-) {
+function sortIntersections(intersection: Intersections, sortBy: SortBy) {
   switch (sortBy) {
     case 'Cardinality':
       return sortByCardinality(intersection);
@@ -47,26 +32,91 @@ function sortIntersections<T extends Intersections>(
     case 'Deviation':
       return sortByDeviation(intersection);
     default:
-      return intersection;
+      throw new Error('Unknown sortBy value: ' + sortBy);
   }
 }
 
-export function sortRows(baseRows: Rows, sortBy: SortBy): Rows {
-  const rows = deepCopy(baseRows);
+type SortMap = {
+  [key: string]: string[];
+};
 
-  if (areRowsSubsets(rows)) {
-    return sortIntersections(rows, sortBy);
-  }
+type SubsetOnlySortOrder = {
+  subsetsOrder: string[];
+};
 
-  const aggs: Aggregates = sortIntersections(rows as any, sortBy) as any;
+type SingleAggregateSortOrder = {
+  aggregatesOrder: string[];
+  subsetsOrder: SortMap;
+};
 
-  aggs.order.forEach((aggId) => {
-    const { items } = aggs.values[aggId];
+type SecondAggregateSortOrder = {
+  firstAggregatesOrder: string[];
+  secondAggregateOrder: SortMap;
+  subsetsOrder: SortMap;
+};
 
-    const newItems = sortRows(items, sortBy);
+export function sortSubsets(
+  subsets: Subsets,
+  sortBy: SortBy,
+): SubsetOnlySortOrder {
+  if (isObjectEmpty(subsets)) throw new Error('Nothing to sort');
 
-    aggs.values[aggId].items = newItems;
+  return {
+    subsetsOrder: sortIntersections(subsets, sortBy),
+  };
+}
+
+export function sortSingleAggregate(
+  aggregates: Aggregates,
+  subsets: Subsets,
+  sortBy: SortBy,
+): SingleAggregateSortOrder {
+  const subsetsOrder: SortMap = {};
+
+  objectForEach(aggregates, (aggregate) => {
+    const items = aggregate.items
+      .map((i) => subsets[i])
+      .reduce(
+        (acc: Subsets, curr: Subset) => ({ ...acc, [curr.id]: curr }),
+        {},
+      );
+
+    subsetsOrder[aggregate.id] = sortIntersections(items, sortBy);
   });
 
-  return aggs;
+  return {
+    aggregatesOrder: sortIntersections(aggregates, sortBy),
+    subsetsOrder,
+  };
+}
+
+export function sortSecondAggregate(
+  firstLevelAggregates: Aggregates,
+  secondLevelAggregates: Aggregates,
+  subsets: Subsets,
+  sortBy: SortBy,
+): SecondAggregateSortOrder {
+  let subsetsOrder: SortMap = {};
+  const secondAggregateOrder: SortMap = {};
+
+  objectForEach(firstLevelAggregates, (aggregate) => {
+    const sub_aggregates = aggregate.items
+      .map((i) => secondLevelAggregates[i])
+      .reduce(
+        (acc: Aggregates, curr: Aggregate) => ({ ...acc, [curr.id]: curr }),
+        {},
+      );
+
+    const { aggregatesOrder: secondSortOrder, subsetsOrder: sub_order } =
+      sortSingleAggregate(sub_aggregates, subsets, sortBy);
+
+    secondAggregateOrder[aggregate.id] = secondSortOrder;
+    subsetsOrder = { ...subsetsOrder, ...sub_order };
+  });
+
+  return {
+    firstAggregatesOrder: sortIntersections(firstLevelAggregates, sortBy),
+    secondAggregateOrder,
+    subsetsOrder,
+  };
 }

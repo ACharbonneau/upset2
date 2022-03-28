@@ -3,6 +3,7 @@ import { FC } from 'react';
 import { useRecoilValue } from 'recoil';
 
 import { dimensionsSelector } from '../../atoms/dimensionsAtom';
+import { useHoveredEntities } from '../../atoms/hoverAtom';
 import { setsAtom } from '../../atoms/setsAtoms';
 import Group from '../custom/Group';
 import { SetLabel } from '../custom/SetLabel';
@@ -16,11 +17,22 @@ type Props = {
 export const SetHeader: FC<Props> = ({ visibleSets, scale }) => {
   const dimensions = useRecoilValue(dimensionsSelector);
   const sets = useRecoilValue(setsAtom);
+  const hovered = useHoveredEntities();
 
   return (
     <g>
       {visibleSets.map((setName, idx) => (
-        <Group key={setName} tx={idx * dimensions.set.width} ty={0}>
+        <Group
+          key={setName}
+          tx={idx * dimensions.set.width}
+          ty={0}
+          onMouseOver={() => {
+            hovered.columns.set(setName);
+          }}
+          onMouseLeave={() => {
+            hovered.columns.set(null);
+          }}
+        >
           <SetSizeBar
             scale={scale}
             size={sets[setName].size}

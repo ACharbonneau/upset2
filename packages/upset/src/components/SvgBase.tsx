@@ -2,22 +2,13 @@
 import '@fortawesome/fontawesome-free/css/all.css';
 
 import { css } from '@emotion/react';
-import React, { FC } from 'react';
+import { FC } from 'react';
 
+import { useSvgDimensions } from '../atoms/dimensionsAtom';
 import translate from '../utils/transform';
 
-type SvgBaseSettings = {
-  margin?: number;
-  height?: number;
-  width?: number;
-};
-
-type Props = {
-  defaultSettings?: SvgBaseSettings;
-};
-
-export const SvgBase: FC<Props> = ({ children, defaultSettings = {} }) => {
-  const { margin = 0, height = 0, width = 0 } = defaultSettings;
+export const SvgBase: FC = ({ children }) => {
+  const { height, width, margin } = useSvgDimensions();
 
   return (
     <div

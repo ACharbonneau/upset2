@@ -1,11 +1,10 @@
 import { css } from '@emotion/react';
 import { CoreUpsetData, UpsetConfig } from '@visdesignlab/upset2-core';
 import { createContext, FC, useEffect, useMemo } from 'react';
-import { useRecoilState, useRecoilValue, useSetRecoilState } from 'recoil';
+import { useRecoilState, useSetRecoilState } from 'recoil';
 
 import { attributeAtom } from '../atoms/attributeAtom';
 import { upsetConfigAtom } from '../atoms/config/upsetConfigAtoms';
-import { dimensionsSelector } from '../atoms/dimensionsAtom';
 import { itemsAtom } from '../atoms/itemsAtoms';
 import { setsAtom } from '../atoms/setsAtoms';
 import { getActions, initializeProvenanceTracking, UpsetActions, UpsetProvenance } from '../provenance';
@@ -70,10 +69,6 @@ export const Root: FC<Props> = ({ data, config, extProvenance, yOffset }) => {
     setAttributeColumns(data.attributeColumns);
   }, [data]);
 
-  const dimensions = useRecoilValue(dimensionsSelector);
-
-  const { height, width, margin } = dimensions;
-
   if (Object.keys(sets).length === 0 || Object.keys(items).length === 0)
     return null;
 
@@ -95,7 +90,7 @@ export const Root: FC<Props> = ({ data, config, extProvenance, yOffset }) => {
           ${baseStyle};
         `}
       >
-        <SvgBase defaultSettings={{ height, width, margin }}>
+        <SvgBase>
           <Header />
           <Body />
         </SvgBase>

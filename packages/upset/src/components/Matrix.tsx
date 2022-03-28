@@ -1,9 +1,8 @@
 import { Aggregate, Subset } from '@visdesignlab/upset2-core';
 import React, { FC } from 'react';
-import { useRecoilValue, useSetRecoilState } from 'recoil';
+import { useRecoilValue } from 'recoil';
 
 import { dimensionsSelector } from '../atoms/dimensionsAtom';
-import { columnHoverAtom } from '../atoms/hoverAtom';
 import ConnectingLine from './custom/ConnectingLine';
 import Group from './custom/Group';
 import MemberShipCircle from './custom/MembershipCircle';
@@ -20,7 +19,6 @@ export const Matrix: FC<Props> = ({
   sets = [],
 }) => {
   const dimensions = useRecoilValue(dimensionsSelector);
-  const setHoveredColumn = useSetRecoilState(columnHoverAtom);
 
   const membership = sets.map((s) => subset.setMembership[s]);
   const memberCount = membership.filter((v) => v === 'Yes').length;
@@ -45,12 +43,6 @@ export const Matrix: FC<Props> = ({
               cx={idx * dimensions.set.width}
               cy={dimensions.body.rowHeight / 2}
               pointerEvents="all"
-              onMouseEnter={() => {
-                setHoveredColumn(set);
-              }}
-              onMouseLeave={() => {
-                setHoveredColumn(null);
-              }}
             />
           );
         })}

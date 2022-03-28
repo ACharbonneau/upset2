@@ -1,4 +1,5 @@
-import { selector } from 'recoil';
+import { useMemo } from 'react';
+import { selector, useRecoilValue } from 'recoil';
 
 import { calculateDimensions } from '../dimensions';
 import { visibleAttributesSelector } from './config/visibleAttributes';
@@ -23,3 +24,11 @@ export const dimensionsSelector = selector<
     );
   },
 });
+
+export function useSvgDimensions() {
+  const { height, width, margin } = useRecoilValue(dimensionsSelector);
+
+  return useMemo(() => {
+    return { height, width, margin };
+  }, [height, width, margin]);
+}

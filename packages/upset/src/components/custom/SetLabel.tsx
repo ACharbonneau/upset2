@@ -4,6 +4,8 @@ import { FC } from 'react';
 import { useRecoilValue } from 'recoil';
 
 import { dimensionsSelector } from '../../atoms/dimensionsAtom';
+import { useHoveredEntities } from '../../atoms/hoverAtom';
+import { highlightBackground } from '../../utils/styles';
 import translate from '../../utils/transform';
 import Group from './Group';
 
@@ -18,12 +20,16 @@ type Props = {
 
 export const SetLabel: FC<Props> = ({ setId, name }) => {
   const dimensions = useRecoilValue(dimensionsSelector);
+  const hovered = useHoveredEntities();
+
   return (
     <Group tx={0} ty={dimensions.set.cardinality.height}>
       <rect
         className={setId}
         css={css`
           ${matrixColumnBackgroundRect}
+
+          ${hovered.shouldTreatAsHovered(setId) && highlightBackground}
         `}
         height={dimensions.set.label.height}
         width={dimensions.set.width}

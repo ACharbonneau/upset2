@@ -67,15 +67,7 @@ type BaseIntersection = ISet & {
 
 export type Subset = BaseIntersection;
 
-export type Subsets = {
-  values: { [subset_id: string]: Subset };
-  order: string[];
-};
-
-export type Intersections = {
-  values: { [k: string]: BaseIntersection };
-  order: string[];
-};
+export type Subsets = { [subset_id: string]: Subset };
 
 export const aggregateByList = [
   'Degree',
@@ -89,26 +81,19 @@ export type AggregateBy = typeof aggregateByList[number];
 export const sortByList = ['Degree', 'Cardinality', 'Deviation'] as const;
 export type SortBy = typeof sortByList[number];
 
-export type Aggregate = Omit<Subset, 'items'> & {
+export type Aggregate = Subset & {
   aggregateBy: AggregateBy;
   level: number;
   description: string;
-  items:
-    | Subsets
-    | {
-        values: { [agg_id: string]: Aggregate };
-        order: string[];
-      };
 };
 
-export type Aggregates = {
-  values: { [agg_id: string]: Aggregate };
-  order: string[];
-};
+export type SecondAggregate = Aggregate;
 
-export type Rows = Subsets | Aggregates;
+export type Aggregates = { [aggregate_id: string]: Aggregate };
 
-export type Row = Subset | Aggregate;
+export type Intersection = Aggregate | Subset;
+
+export type Intersections = { [id: string]: Intersection };
 
 export type CoreUpsetData = {
   label: ColumnName;
@@ -165,32 +150,16 @@ export type UpsetConfig = {
   };
 };
 
-export function areRowsAggregates(rr: Rows): rr is Aggregates {
-  const { order } = rr;
-
-  if (order.length === 0) return false;
-
-  const row = rr.values[order[0]];
-
-  return row.type === 'Aggregate';
+export function isIntersectionAggregate(
+  intersection: Intersection,
+): intersection is Aggregate {
+  return intersection.type === 'Aggregate';
 }
 
-export function areRowsSubsets(rr: Rows): rr is Subsets {
-  const { order } = rr;
-
-  if (order.length === 0) return false;
-
-  const row = rr.values[order[0]];
-
-  return row.type === 'Subset';
-}
-
-export function isRowAggregate(row: Row): row is Aggregate {
-  return row.type === 'Aggregate';
-}
-
-export function isRowSubset(row: Row): row is Subset {
-  return row.type === 'Subset';
+export function isIntersectionSubset(
+  intersection: Intersection,
+): intersection is Subset {
+  return intersection.type === 'Subset';
 }
 
 export function getDegreeFromSetMembership(membership: {

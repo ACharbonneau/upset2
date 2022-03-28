@@ -1,5 +1,5 @@
 {
-  "include": ["src", "types"],
+  "include": ["src", "types", ".storybook/wdyr.ts"],
   "compilerOptions": {
     "types": ["@emotion/core"],
     "module": "esnext",

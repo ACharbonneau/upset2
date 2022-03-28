@@ -4,50 +4,32 @@ import {
   Aggregate,
   AggregateBy,
   Aggregates,
-  areRowsSubsets,
   getBelongingSetsFromSetMembership,
   getDegreeFromSetMembership,
-  isRowSubset,
+  Intersections,
   Items,
-  Row,
-  Rows,
   SetMembershipStatus,
   Sets,
+  Subset,
   Subsets,
   UNINCLUDED,
 } from './types';
-
-function getItems(row: Row) {
-  if (isRowSubset(row)) {
-    return row.items;
-  } else {
-    const items: string[] = [];
-
-    row.items.order.forEach((subsetId) => {
-      const element = row.items.values[subsetId];
-
-      items.push(...getItems(element));
-    });
-
-    return Array.from(new Set(items));
-  }
-}
+import { isObjectEmpty, objectForEach } from './utils';
 
 function aggregateByDegree(
-  subsets: Subsets,
+  intersections: Intersections,
   level: number,
   items: Items,
   attributeColumns: string[],
 ) {
-  if (subsets.order.length === 0) return subsets;
+  if (isObjectEmpty(intersections)) throw new Error('No intersections');
 
-  const aggs: Aggregates = {
-    values: {},
-    order: [],
-  };
+  const aggs: Aggregates = {};
   const degreeMap: { [key: string]: string } = {};
 
-  const setList = Object.keys(subsets.values[subsets.order[0]].setMembership);
+  const setList = Object.keys(
+    intersections[Object.keys(intersections)[0]].setMembership,
+  );
 
   for (let i = 0; i <= setList.length; ++i) {
     const id = getId('Agg', `Degree ${i}`);
@@ -55,10 +37,7 @@ function aggregateByDegree(
     const agg: Aggregate = {
       id,
       elementName: `Degree ${i}`,
-      items: {
-        values: {},
-        order: [],
-      },
+      items: [],
       size: 0,
       type: 'Aggregate',
       setMembership: {},
@@ -70,26 +49,23 @@ function aggregateByDegree(
     };
 
     degreeMap[i] = id;
-    aggs.values[id] = agg;
-    aggs.order.push(id);
+    aggs[id] = agg;
   }
 
-  subsets.order.forEach((subsetId) => {
-    const subset = subsets.values[subsetId];
-    const degree = getDegreeFromSetMembership(subset.setMembership);
+  objectForEach(intersections, (intersections) => {
+    const degree = getDegreeFromSetMembership(intersections.setMembership);
 
-    const relevantAggregate = aggs.values[degreeMap[degree]];
+    const relevantAggregate = aggs[degreeMap[degree]];
 
-    relevantAggregate.items.values[subsetId] = subset;
-    relevantAggregate.items.order.push(subsetId);
-    relevantAggregate.size += subset.size;
-    relevantAggregate.deviation += subset.deviation;
+    relevantAggregate.items.push(intersections.id);
+    relevantAggregate.size += intersections.size;
+    relevantAggregate.deviation += intersections.deviation;
   });
 
-  aggs.order.forEach((aggId) => {
-    aggs.values[aggId].attributes = getFiveNumberSummary(
+  objectForEach(aggs, (aggregate: Aggregate) => {
+    aggregate.attributes = getFiveNumberSummary(
       items,
-      getItems(aggs.values[aggId]),
+      aggregate.items,
       attributeColumns,
     );
   });
@@ -98,21 +74,20 @@ function aggregateByDegree(
 }
 
 function aggregateBySets(
-  subsets: Subsets,
+  intersections: Intersections,
   sets: Sets,
   level: number,
   items: Items,
   attributeColumns: string[],
 ) {
-  if (subsets.order.length === 0) return subsets;
+  if (isObjectEmpty(intersections)) throw new Error('No intersections');
 
-  const aggs: Aggregates = {
-    values: {},
-    order: [],
-  };
+  const aggs: Aggregates = {};
 
   const setMap: { [k: string]: string } = {};
-  const setList = Object.keys(subsets.values[subsets.order[0]].setMembership);
+  const setList = Object.keys(
+    intersections[Object.keys(intersections)[0]].setMembership,
+  );
 
   const setMembership: { [key: string]: SetMembershipStatus } = {};
   const setMembershipNone: { [key: string]: SetMembershipStatus } = {};
@@ -131,10 +106,7 @@ function aggregateBySets(
     const agg: Aggregate = {
       id,
       elementName,
-      items: {
-        values: {},
-        order: [],
-      },
+      items: [],
       size: 0,
       type: 'Aggregate',
       setMembership:
@@ -149,40 +121,34 @@ function aggregateBySets(
     };
 
     setMap[set] = id;
-    aggs.values[id] = agg;
-    aggs.order.push(id);
+    aggs[id] = agg;
   });
 
-  subsets.order.forEach((subsetId) => {
-    const subset = subsets.values[subsetId];
-
+  objectForEach(intersections, (intersection) => {
     const belongingSets = getBelongingSetsFromSetMembership(
-      subset.setMembership,
+      intersection.setMembership,
     );
 
     if (belongingSets.length === 0) {
-      const relevantAggregate = aggs.values[setMap[UNINCLUDED]];
+      const relevantAggregate = aggs[setMap[UNINCLUDED]];
 
-      relevantAggregate.items.values[subsetId] = subset;
-      relevantAggregate.items.order.push(subsetId);
-      relevantAggregate.size += subset.size;
-      relevantAggregate.deviation += subset.deviation;
+      relevantAggregate.items.push(intersection.id);
+      relevantAggregate.size += intersection.size;
+      relevantAggregate.deviation += intersection.deviation;
     }
-
     belongingSets.forEach((set) => {
-      const relevantAggregate = aggs.values[setMap[set]];
+      const relevantAggregate = aggs[setMap[set]];
 
-      relevantAggregate.items.values[subsetId] = subset;
-      relevantAggregate.items.order.push(subsetId);
-      relevantAggregate.size += subset.size;
-      relevantAggregate.deviation += subset.deviation;
+      relevantAggregate.items.push(intersection.id);
+      relevantAggregate.size += intersection.size;
+      relevantAggregate.deviation += intersection.deviation;
     });
   });
 
-  aggs.order.forEach((aggId) => {
-    aggs.values[aggId].attributes = getFiveNumberSummary(
+  objectForEach(aggs, (aggregate: Aggregate) => {
+    aggregate.attributes = getFiveNumberSummary(
       items,
-      getItems(aggs.values[aggId]),
+      aggregate.items,
       attributeColumns,
     );
   });
@@ -191,17 +157,14 @@ function aggregateBySets(
 }
 
 function aggregateByDeviation(
-  subsets: Subsets,
+  intersections: Intersections,
   level: number,
   items: Items,
   attributeColumns: string[],
 ) {
-  if (subsets.order.length === 0) return subsets;
+  if (isObjectEmpty(intersections)) throw new Error('No intersections');
 
-  const aggs: Aggregates = {
-    values: {},
-    order: [],
-  };
+  const aggs: Aggregates = {};
 
   const deviationMap: { [key: string]: string } = {};
   const deviationTypes = {
@@ -224,10 +187,7 @@ function aggregateByDeviation(
       id,
       elementName,
       description,
-      items: {
-        values: {},
-        order: [],
-      },
+      items: [],
       size: 0,
       type: 'Aggregate',
       setMembership: {},
@@ -238,26 +198,23 @@ function aggregateByDeviation(
     };
 
     deviationMap[type] = id;
-    aggs.values[id] = agg;
-    aggs.order.push(id);
+    aggs[id] = agg;
   });
 
-  subsets.order.forEach((subsetId) => {
-    const subset = subsets.values[subsetId];
-    const deviationType = subset.deviation >= 0 ? 'pos' : 'neg';
+  objectForEach(intersections, (intersection) => {
+    const deviationType = intersection.deviation >= 0 ? 'pos' : 'neg';
 
-    const relevantAggregate = aggs.values[deviationMap[deviationType]];
+    const relevantAggregate = aggs[deviationMap[deviationType]];
 
-    relevantAggregate.items.values[subsetId] = subset;
-    relevantAggregate.items.order.push(subsetId);
-    relevantAggregate.size += subset.size;
-    relevantAggregate.deviation += subset.deviation;
+    relevantAggregate.items.push(intersection.id);
+    relevantAggregate.size += intersection.size;
+    relevantAggregate.deviation += intersection.deviation;
   });
 
-  aggs.order.forEach((aggId) => {
-    aggs.values[aggId].attributes = getFiveNumberSummary(
+  objectForEach(aggs, (aggregate) => {
+    aggregate.attributes = getFiveNumberSummary(
       items,
-      getItems(aggs.values[aggId]),
+      aggregate.items,
       attributeColumns,
     );
   });
@@ -266,23 +223,22 @@ function aggregateByDeviation(
 }
 
 function aggregateByOverlaps(
-  subsets: Subsets,
+  intersections: Intersections,
   sets: Sets,
   degree: number,
   level: number,
   items: Items,
   attributeColumns: string[],
 ) {
-  if (subsets.order.length === 0) return subsets;
+  if (isObjectEmpty(intersections)) throw new Error('No intersections');
 
-  const aggs: Aggregates = {
-    values: {},
-    order: [],
-  };
+  const aggs: Aggregates = {};
 
   const setMembership: { [key: string]: SetMembershipStatus } = {};
 
-  const setList = Object.keys(subsets.values[subsets.order[0]].setMembership);
+  const setList = Object.keys(
+    intersections[Object.keys(intersections)[0]].setMembership,
+  );
   const combinations: string[] = combinationsFromArray(setList, degree).map(
     (combo: string[]) => combo.sort().join(','),
   );
@@ -308,10 +264,7 @@ function aggregateByOverlaps(
     const agg: Aggregate = {
       id,
       elementName,
-      items: {
-        values: {},
-        order: [],
-      },
+      items: [],
       size: 0,
       type: 'Aggregate',
       aggregateBy: 'Overlaps',
@@ -323,12 +276,10 @@ function aggregateByOverlaps(
     };
 
     overlapAggMap[combo] = id;
-    aggs.values[id] = agg;
-    aggs.order.push(id);
+    aggs[id] = agg;
   });
 
-  subsets.order.forEach((subsetId) => {
-    const subset = subsets.values[subsetId];
+  objectForEach(intersections, (subset) => {
     const belongingSets = getBelongingSetsFromSetMembership(
       subset.setMembership,
     );
@@ -337,19 +288,18 @@ function aggregateByOverlaps(
     );
 
     overlaps.forEach((over) => {
-      const relevantAgg = aggs.values[overlapAggMap[over]];
+      const relevantAgg = aggs[overlapAggMap[over]];
 
-      relevantAgg.items.values[subsetId] = subset;
-      relevantAgg.items.order.push(subsetId);
+      relevantAgg.items.push(subset.id);
       relevantAgg.size += subset.size;
       relevantAgg.deviation += subset.deviation;
     });
   });
 
-  aggs.order.forEach((aggId) => {
-    aggs.values[aggId].attributes = getFiveNumberSummary(
+  objectForEach(aggs, (aggregate) => {
+    aggregate.attributes = getFiveNumberSummary(
       items,
-      getItems(aggs.values[aggId]),
+      aggregate.items,
       attributeColumns,
     );
   });
@@ -357,8 +307,8 @@ function aggregateByOverlaps(
   return aggs;
 }
 
-function aggregateSubsets(
-  subsets: Subsets,
+function aggregateIntersections(
+  intersections: Intersections,
   aggregateBy: AggregateBy,
   overlapDegree: number,
   sets: Sets,
@@ -366,22 +316,36 @@ function aggregateSubsets(
   attributeColumns: string[],
   level: number = 1,
 ) {
-  if (aggregateBy === 'Degree')
-    return aggregateByDegree(subsets, level, items, attributeColumns);
-  if (aggregateBy === 'Sets')
-    return aggregateBySets(subsets, sets, level, items, attributeColumns);
-  if (aggregateBy === 'Deviations')
-    return aggregateByDeviation(subsets, level, items, attributeColumns);
-  if (aggregateBy === 'Overlaps')
-    return aggregateByOverlaps(
-      subsets,
-      sets,
-      overlapDegree,
-      level,
-      items,
-      attributeColumns,
-    );
-  return subsets;
+  switch (aggregateBy) {
+    case 'Degree':
+      return aggregateByDegree(intersections, level, items, attributeColumns);
+    case 'Sets':
+      return aggregateBySets(
+        intersections,
+        sets,
+        level,
+        items,
+        attributeColumns,
+      );
+    case 'Deviations':
+      return aggregateByDeviation(
+        intersections,
+        level,
+        items,
+        attributeColumns,
+      );
+    case 'Overlaps':
+      return aggregateByOverlaps(
+        intersections,
+        sets,
+        overlapDegree,
+        level,
+        items,
+        attributeColumns,
+      );
+    default:
+      throw new Error('Incorrect aggregateBy value');
+  }
 }
 
 export function firstAggregation(
@@ -391,8 +355,8 @@ export function firstAggregation(
   sets: Sets,
   items: Items,
   attributeColumns: string[],
-): Rows {
-  return aggregateSubsets(
+): Intersections {
+  return aggregateIntersections(
     subsets,
     aggregateBy,
     overlapDegree,
@@ -404,34 +368,45 @@ export function firstAggregation(
 
 export function secondAggregation(
   aggregates: Aggregates,
+  subsets: Subsets,
   aggregateBy: AggregateBy,
   overlapDegree: number,
   sets: Sets,
   items: Items,
   attributeColumns: string[],
 ) {
-  const aggs: Aggregates = {
-    values: {},
-    order: [],
-  };
+  const firstLevelAggregates: Aggregates = {};
+  const secondLevelAggregates: Aggregates = {};
 
-  aggregates.order.forEach((aggId: string) => {
-    const agg = aggregates.values[aggId];
-    if (areRowsSubsets(agg.items)) {
-      const itms = aggregateSubsets(
-        agg.items,
-        aggregateBy,
-        overlapDegree,
-        sets,
-        items,
-        attributeColumns,
-        2,
+  objectForEach(aggregates, (aggregate) => {
+    const relevantSubsets = aggregate.items
+      .map((i) => subsets[i])
+      .reduce(
+        (acc: Subsets, curr: Subset) => ({ ...acc, [curr.id]: curr }),
+        {},
       );
-      const newAgg = { ...agg, items: itms };
-      aggs.values[aggId] = newAgg;
-      aggs.order.push(aggId);
-    }
+
+    const secondAggs = aggregateIntersections(
+      relevantSubsets,
+      aggregateBy,
+      overlapDegree,
+      sets,
+      items,
+      attributeColumns,
+      2,
+    );
+
+    objectForEach(secondAggs, (secondAgg) => {
+      if (secondLevelAggregates[secondAgg.id])
+        throw new Error(
+          'Duplicate aggregate. Please check second aggregation method.',
+        );
+      secondLevelAggregates[secondAgg.id] = secondAgg;
+    });
+
+    aggregate.items = Object.keys(secondAggs);
+    firstLevelAggregates[aggregate.id] = aggregate;
   });
 
-  return aggs;
+  return { firstLevelAggregates, secondLevelAggregates };
 }

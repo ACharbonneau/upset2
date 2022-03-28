@@ -16,3 +16,5 @@ export * from './types';
 export * from './aggregate';
 export * from './sort';
 export * from './filter';
+
+export { objectForEach } from './utils';

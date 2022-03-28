@@ -193,11 +193,10 @@ export function getSubsets(
   vSets: string[],
   attributeColumns: string[],
 ): Subsets {
+  const subsets: Subsets = {};
+
   if (vSets.length === 0) {
-    return {
-      values: {},
-      order: [],
-    };
+    return subsets;
   }
 
   const items = Object.values(dataItems);
@@ -205,10 +204,6 @@ export function getSubsets(
   const vSetNames = vSets.map((v) => sets[v].elementName);
 
   const comboCount = 2 ** vSets.length - 1;
-  const subsets: Subsets = {
-    values: {},
-    order: [],
-  };
 
   const setIntersectionMembership: { [key: string]: string[] } = {};
 
@@ -267,8 +262,7 @@ export function getSubsets(
       attributes: getFiveNumberSummary(dataItems, itm, attributeColumns),
     };
 
-    subsets.values[subset.id] = subset;
-    subsets.order.push(subset.id);
+    subsets[subset.id] = subset;
   });
 
   return subsets;

@@ -5,6 +5,8 @@ import { FC } from 'react';
 import { useRecoilValue } from 'recoil';
 
 import { dimensionsSelector } from '../../atoms/dimensionsAtom';
+import { useHoveredEntities } from '../../atoms/hoverAtom';
+import { highlightBackground } from '../../utils/styles';
 import translate from '../../utils/transform';
 import Group from './Group';
 
@@ -30,6 +32,7 @@ type Props = {
 
 export const SetSizeBar: FC<Props> = ({
   scale,
+  setId,
   size,
   label,
   tx = 0,
@@ -38,6 +41,7 @@ export const SetSizeBar: FC<Props> = ({
   showLabel = false,
 }) => {
   const dimensions = useRecoilValue(dimensionsSelector);
+  const hovered = useHoveredEntities();
 
   return (
     <Group tx={tx} ty={ty}>
@@ -48,6 +52,7 @@ export const SetSizeBar: FC<Props> = ({
       <rect
         css={css`
           ${matrixColumnBackgroundRect}
+          ${hovered.shouldTreatAsHovered(setId) && highlightBackground}
         `}
         height={dimensions.set.cardinality.height}
         width={dimensions.set.width}

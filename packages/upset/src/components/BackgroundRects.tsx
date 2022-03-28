@@ -4,17 +4,16 @@ import { useRecoilValue } from 'recoil';
 
 import { visibleSetSelector } from '../atoms/config/visibleSetsAtoms';
 import { dimensionsSelector } from '../atoms/dimensionsAtom';
-import { columnHoverAtom, rowHoverAtom } from '../atoms/hoverAtom';
-import { subsetSelector } from '../atoms/subsetAtoms';
+import { useHoveredEntities } from '../atoms/hoverAtom';
+import { flattenedRowsSelector } from '../atoms/renderRowsAtom';
 import { highlightBackground } from '../utils/styles';
 import translate from '../utils/transform';
 
 export const BackgroundRects = () => {
   const dimensions = useRecoilValue(dimensionsSelector);
   const visibleSets = useRecoilValue(visibleSetSelector);
-  const subsets = useRecoilValue(subsetSelector);
-  const hoveredRow = useRecoilValue(rowHoverAtom);
-  const hoveredColumn = useRecoilValue(columnHoverAtom);
+  const rows = useRecoilValue(flattenedRowsSelector);
+  const hovered = useHoveredEntities();
 
   return (
     <>
@@ -27,11 +26,12 @@ export const BackgroundRects = () => {
             <rect
               className={setName}
               css={css`
-                ${hoveredColumn === setName && highlightBackground}
+                ${hovered.shouldTreatAsHovered(setName) && highlightBackground}
               `}
               height={dimensions.body.height}
               width={dimensions.set.width}
               fill="none"
+              pointerEvents="none"
             />
           </g>
         ))}
@@ -40,23 +40,30 @@ export const BackgroundRects = () => {
         className="background-rows"
         transform={translate(dimensions.set.label.height, 0)}
       >
-        {subsets.order.map((subsetId, idx) => (
-          <g
-            key={subsetId}
-            transform={translate(0, idx * dimensions.body.rowHeight)}
-          >
-            <rect
+        {rows.map(({ row }, idx) => {
+          if (row.type !== 'Subset') return null;
+
+          const subsetId = row.id;
+
+          return (
+            <g
               key={subsetId}
-              className={subsetId}
-              css={css`
-                ${hoveredRow === subsetId && highlightBackground}
-              `}
-              height={dimensions.body.rowHeight}
-              width={dimensions.body.rowWidth}
-              fill="none"
-            />
-          </g>
-        ))}
+              transform={translate(0, idx * dimensions.body.rowHeight)}
+            >
+              <rect
+                key={subsetId}
+                className={subsetId}
+                css={css`
+                  ${hovered.shouldTreatAsHovered(subsetId) &&
+                  highlightBackground}
+                `}
+                height={dimensions.body.rowHeight}
+                width={dimensions.body.rowWidth}
+                fill="none"
+              />
+            </g>
+          );
+        })}
       </g>
     </>
   );

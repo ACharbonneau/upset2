@@ -1,4 +1,4 @@
-import { Aggregates, Intersections, areRowsSubsets, Rows } from './types';
+import { Aggregates, areRowsSubsets, Intersections, Intersections } from './types';
 import { deepCopy } from './utils';
 
 function filterIntersections<T extends Intersections>(
@@ -27,9 +27,9 @@ function filterIntersections<T extends Intersections>(
 }
 
 export function filterRows(
-  baseRows: Rows,
+  baseRows: Intersections,
   filters: { maxVisible: number; minVisible: number; hideEmpty: boolean },
-): Rows {
+): Intersections {
   const rows = deepCopy(baseRows);
 
   if (areRowsSubsets(rows)) {

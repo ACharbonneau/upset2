@@ -1,6 +1,6 @@
 import { Box, ThemeProvider } from '@mui/material';
 import { CoreUpsetData, UpsetConfig } from '@visdesignlab/upset2-core';
-import React, { FC, useMemo } from 'react';
+import React, { FC, StrictMode, useMemo } from 'react';
 import { RecoilRoot } from 'recoil';
 
 import { defaultConfig } from '../atoms/config/upsetConfigAtoms';
@@ -45,24 +45,26 @@ export const Upset: FC<UpsetProps> = ({
   }, [data, config]);
 
   return (
-    <ThemeProvider theme={defaultTheme}>
-      <Box
-        sx={{
-          display: 'flex',
-          height: parentHasHeight ? '100%' : `calc(100vh - ${yOffset}px)`,
-          width: '100%',
-          fontFamily: 'Roboto, Arial',
-        }}
-      >
-        <RecoilRoot>
-          <Root
-            data={data}
-            config={combinedConfig}
-            extProvenance={extProvenance}
-            yOffset={yOffset}
-          />
-        </RecoilRoot>
-      </Box>
-    </ThemeProvider>
+    <StrictMode>
+      <ThemeProvider theme={defaultTheme}>
+        <Box
+          sx={{
+            display: 'flex',
+            height: parentHasHeight ? '100%' : `calc(100vh - ${yOffset}px)`,
+            width: '100%',
+            fontFamily: 'Roboto, Arial',
+          }}
+        >
+          <RecoilRoot>
+            <Root
+              data={data}
+              config={combinedConfig}
+              extProvenance={extProvenance}
+              yOffset={yOffset}
+            />
+          </RecoilRoot>
+        </Box>
+      </ThemeProvider>
+    </StrictMode>
   );
 };
