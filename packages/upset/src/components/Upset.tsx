@@ -3,7 +3,7 @@ import { CoreUpsetData, UpsetConfig } from '@visdesignlab/upset2-core';
 import React, { FC, StrictMode, useMemo } from 'react';
 import { RecoilRoot } from 'recoil';
 
-import { defaultConfig } from '../atoms/config/upsetConfigAtoms';
+import { defaultConfig, upsetConfigAtom } from '../atoms/config/upsetConfigAtoms';
 import { UpsetActions, UpsetProvenance } from '../provenance';
 import defaultTheme from '../utils/theme';
 import { Root } from './Root';
@@ -57,7 +57,9 @@ export const Upset: FC<UpsetProps> = ({
             fontFamily: 'Roboto, Arial',
           }}
         >
-          <RecoilRoot>
+          <RecoilRoot
+            initializeState={({ set }) => set(upsetConfigAtom, combinedConfig)}
+          >
             <Root
               data={data}
               config={combinedConfig}
