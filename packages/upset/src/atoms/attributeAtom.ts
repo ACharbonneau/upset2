@@ -1,10 +1,11 @@
-import { atom, selectorFamily } from 'recoil';
+import { selector, selectorFamily } from 'recoil';
 
-import { itemsAtom } from './itemsAtoms';
+import { dataAtom } from './dataAtom';
+import { itemsSelector } from './itemsAtoms';
 
-export const attributeAtom = atom<string[]>({
+export const attributeSelector = selector<string[]>({
   key: 'attribute-columns',
-  default: [],
+  get: ({ get }) => get(dataAtom).attributeColumns,
 });
 
 export const attributeValuesSelector = selectorFamily<number[], string>({
@@ -12,7 +13,7 @@ export const attributeValuesSelector = selectorFamily<number[], string>({
   get:
     (attribute: string) =>
     ({ get }) => {
-      const items = get(itemsAtom);
+      const items = get(itemsSelector);
       const values = Object.values(items).map(
         (val) => val[attribute] as number,
       );

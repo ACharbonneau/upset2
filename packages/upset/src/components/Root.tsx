@@ -1,12 +1,11 @@
 import { css } from '@emotion/react';
 import { CoreUpsetData, UpsetConfig } from '@visdesignlab/upset2-core';
-import { createContext, FC, useEffect, useMemo } from 'react';
-import { useRecoilState, useSetRecoilState } from 'recoil';
+import { createContext, FC, useMemo } from 'react';
+import { useSetRecoilState } from 'recoil';
 
-import { attributeAtom } from '../atoms/attributeAtom';
-import { itemsAtom } from '../atoms/itemsAtoms';
-import { setsAtom } from '../atoms/setsAtoms';
-import { UpsetActions, UpsetProvenance, useProvenance } from '../provenance';
+import { upsetConfigAtom } from '../atoms/config/upsetConfigAtoms';
+import { isAtLatestAtom, isAtRootAtom } from '../atoms/provenanceAtom';
+import { getActions, initializeProvenanceTracking, UpsetActions, UpsetProvenance } from '../provenance';
 import { Body } from './Body';
 import { ElementSidebar } from './ElementView/ElementSidebar';
 import { Header } from './Header/Header';
@@ -18,6 +17,11 @@ const baseStyle = css`
   padding: 0.25em;
 `;
 
+export const ProvenanceContext = createContext<{
+  provenance: UpsetProvenance;
+  actions: UpsetActions;
+}>(undefined!);
+
 type Props = {
   data: CoreUpsetData;
   config: UpsetConfig;
@@ -28,33 +32,29 @@ type Props = {
   yOffset: number;
 };
 
-export const Root: FC<Props> = ({ data, config, yOffset }) => {
-  const { provenance } = useProvenance();
-  (window.parent.window as any).provenace = () => {
-    console.table(JSON.parse(JSON.stringify(provenance.graph.nodes)));
-  };
+export const Root: FC<Props> = ({ config, yOffset }) => {
+  // Get setter for recoil config atom
+  const setState = useSetRecoilState(upsetConfigAtom);
+  const rootSetter = useSetRecoilState(isAtRootAtom);
+  const latestSetter = useSetRecoilState(isAtLatestAtom);
 
-  const [sets, setSets] = useRecoilState(setsAtom);
-  const [items, setItems] = useRecoilState(itemsAtom);
-  const setAttributeColumns = useSetRecoilState(attributeAtom);
-
-  // This hook will populate initial sets, items, attributes
-  useEffect(() => {
-    setSets(data.sets);
-    setItems(data.items);
-    setAttributeColumns(data.attributeColumns);
-  }, [data]);
-
-  if (Object.keys(sets).length === 0 || Object.keys(items).length === 0)
-    return null;
+  // Initialize Provenance and pass it setter to connect
+  const { provenance, actions } = useMemo(() => {
+    const provenance = initializeProvenanceTracking(
+      config,
+      setState,
+      rootSetter,
+      latestSetter,
+    );
+    const actions = getActions(provenance);
+    return { provenance, actions };
+  }, [config]);
 
   return (
     <ProvenanceContext.Provider
       value={{
         provenance,
         actions,
-        isAtLatest: provenance.current.children.length === 0,
-        isAtRoot: provenance.current.id === provenance.root.id,
       }}
     >
       <div
@@ -79,6 +79,6 @@ export const Root: FC<Props> = ({ data, config, yOffset }) => {
         </SvgBase>
       </div>
       <ElementSidebar yOffset={yOffset} />
-    </>
+    </ProvenanceContext.Provider>
   );
 };

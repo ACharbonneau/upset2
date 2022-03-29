@@ -33,7 +33,6 @@ type Props = {
 
 export const SetSizeBar: FC<Props> = ({
   scale,
-  setId,
   size,
   setId,
   label,

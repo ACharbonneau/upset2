@@ -1,6 +1,6 @@
 import { atom, selector } from 'recoil';
 
-import { setsAtom } from '../setsAtoms';
+import { setsSelector } from '../setsAtoms';
 import { upsetConfigAtom } from './upsetConfigAtoms';
 
 export const visibleSetSelector = selector<string[]>({
@@ -12,7 +12,7 @@ export const hiddenSetSelector = selector<string[]>({
   key: 'hidden-sets',
   get: ({ get }) => {
     const visibleSets = get(visibleSetSelector);
-    const sets = get(setsAtom);
+    const sets = get(setsSelector);
     const setList = Object.keys(sets);
     const sortOrder = get(hiddenSetSortAtom);
 

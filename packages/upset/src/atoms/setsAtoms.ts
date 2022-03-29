@@ -1,7 +1,13 @@
 import { Sets } from '@visdesignlab/upset2-core';
-import { atom } from 'recoil';
+import { selector } from 'recoil';
 
-export const setsAtom = atom<Sets>({
+import { dataAtom } from './dataAtom';
+
+export const setsSelector = selector<Sets>({
   key: 'base-sets',
-  default: {},
+  get: ({ get }) => {
+    const data = get(dataAtom);
+
+    return data.sets;
+  },
 });

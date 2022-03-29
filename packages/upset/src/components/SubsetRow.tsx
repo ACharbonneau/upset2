@@ -2,7 +2,7 @@ import { Subset } from '@visdesignlab/upset2-core';
 import React, { FC } from 'react';
 import { useRecoilValue } from 'recoil';
 
-import { visibleSetSelector } from '../atoms/config/visibleSetsAtoms';
+import { upsetConfigAtom } from '../atoms/config/upsetConfigAtoms';
 import { AttributeBars } from './AttributeBars';
 import { CardinalityBar } from './CardinalityBars';
 import { DeviationBar } from './DeviationBars';
@@ -13,7 +13,7 @@ type Props = {
 };
 
 export const SubsetRow: FC<Props> = ({ subset }) => {
-  const visibleSets = useRecoilValue(visibleSetSelector);
+  const { visibleSets } = useRecoilValue(upsetConfigAtom);
 
   return (
     <>

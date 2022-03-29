@@ -14,8 +14,8 @@ import {
 import { FC, useContext, useState } from 'react';
 import { useRecoilValue } from 'recoil';
 
-import { attributeAtom } from '../../atoms/attributeAtom';
-import { itemsAtom } from '../../atoms/itemsAtoms';
+import { attributeSelector } from '../../atoms/attributeAtom';
+import { itemsSelector } from '../../atoms/itemsAtoms';
 import { useProvenance } from '../../provenance';
 import { HistogramPlot } from './HistogramPlot';
 import { ScatterplotPlot } from './Scatterplot';
@@ -26,8 +26,8 @@ type Props = {
 
 export const AddScatterplot: FC<Props> = ({ handleClose }) => {
   const { actions } = useProvenance();
-  const attributeColumns = useRecoilValue(attributeAtom);
-  const items = useRecoilValue(itemsAtom);
+  const attributeColumns = useRecoilValue(attributeSelector);
+  const items = useRecoilValue(itemsSelector);
   const [x, setX] = useState<string>(attributeColumns[0]);
   const [y, setY] = useState<string>(attributeColumns[1]);
   const [xLogscale, setXLogScale] = useState(false);
@@ -139,8 +139,8 @@ export const AddScatterplot: FC<Props> = ({ handleClose }) => {
 
 export const AddHistogram: FC<Props> = ({ handleClose }) => {
   const { actions } = useProvenance();
-  const items = useRecoilValue(itemsAtom);
-  const attributeColumns = useRecoilValue(attributeAtom);
+  const items = useRecoilValue(itemsSelector);
+  const attributeColumns = useRecoilValue(attributeSelector);
   const [attribute, setAttribute] = useState(attributeColumns[0]);
   const [bins, setBins] = useState(20);
   const [frequency, setFrequency] = useState(true);

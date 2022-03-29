@@ -4,7 +4,7 @@ import { Aggregate } from '@visdesignlab/upset2-core';
 import { FC } from 'react';
 import { useRecoilValue } from 'recoil';
 
-import { visibleSetSelector } from '../atoms/config/visibleSetsAtoms';
+import { upsetConfigAtom } from '../atoms/config/upsetConfigAtoms';
 import { dimensionsSelector } from '../atoms/dimensionsAtom';
 import translate from '../utils/transform';
 import { CardinalityBar } from './CardinalityBars';
@@ -33,7 +33,7 @@ export const collapsed = (
 );
 
 export const AggregateRow: FC<Props> = ({ aggregateRow }) => {
-  const visibleSets = useRecoilValue(visibleSetSelector);
+  const { visibleSets } = useRecoilValue(upsetConfigAtom);
   const dimensions = useRecoilValue(dimensionsSelector);
 
   let width = dimensions.body.rowWidth;

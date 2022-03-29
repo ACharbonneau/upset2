@@ -4,6 +4,7 @@ import React, { FC, StrictMode, useMemo } from 'react';
 import { RecoilRoot } from 'recoil';
 
 import { defaultConfig, upsetConfigAtom } from '../atoms/config/upsetConfigAtoms';
+import { dataAtom } from '../atoms/dataAtom';
 import { UpsetActions, UpsetProvenance } from '../provenance';
 import defaultTheme from '../utils/theme';
 import { Root } from './Root';
@@ -41,8 +42,6 @@ export const Upset: FC<UpsetProps> = ({
 
     conf.visibleAttributes = data.attributeColumns.slice(0, loadAttributes);
 
-    console.log('Hello');
-
     return conf;
   }, [data, config]);
 
@@ -58,7 +57,10 @@ export const Upset: FC<UpsetProps> = ({
           }}
         >
           <RecoilRoot
-            initializeState={({ set }) => set(upsetConfigAtom, combinedConfig)}
+            initializeState={({ set }) => {
+              set(upsetConfigAtom, combinedConfig);
+              set(dataAtom, data);
+            }}
           >
             <Root
               data={data}

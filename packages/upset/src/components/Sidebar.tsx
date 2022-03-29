@@ -22,30 +22,25 @@ import { AggregateBy, aggregateByList, SortBy, sortByList } from '@visdesignlab/
 import React, { Fragment, useContext, useEffect, useState } from 'react';
 import { useRecoilValue } from 'recoil';
 
-import {
-  firstAggregateSelector,
-  firstOvelapDegreeSelector,
-  secondAggregateSelector,
-  secondOverlapDegreeSelector,
-} from '../atoms/config/aggregateAtoms';
-import { hideEmptySelector, maxVisibleSelector, minVisibleSelector } from '../atoms/config/filterAtoms';
-import { sortBySelector } from '../atoms/config/sortByAtom';
-import { visibleSetSelector } from '../atoms/config/visibleSetsAtoms';
+import { upsetConfigAtom } from '../atoms/config/upsetConfigAtoms';
+import { isAtLatestAtom, isAtRootAtom } from '../atoms/provenanceAtom';
 import { useProvenance } from '../provenance';
 
 /** @jsxImportSource @emotion/react */
 export const Sidebar = () => {
-  const { actions } = useProvenance();
-  const visibleSets = useRecoilValue(visibleSetSelector);
-  const firstAggregateBy = useRecoilValue(firstAggregateSelector);
-  const firstOverlapDegree = useRecoilValue(firstOvelapDegreeSelector);
-  const secondAggregateBy = useRecoilValue(secondAggregateSelector);
-  const secondOverlapDegree = useRecoilValue(secondOverlapDegreeSelector);
+  const { provenance, actions } = useProvenance();
+  const isAtRoot = useRecoilValue(isAtRootAtom);
+  const isAtLatest = useRecoilValue(isAtLatestAtom);
 
-  const sortBy = useRecoilValue(sortBySelector);
-  const maxVisible = useRecoilValue(maxVisibleSelector);
-  const minVisible = useRecoilValue(minVisibleSelector);
-  const hideEmpty = useRecoilValue(hideEmptySelector);
+  const {
+    visibleSets,
+    firstAggregateBy,
+    firstOverlapDegree,
+    secondAggregateBy,
+    secondOverlapDegree,
+    sortBy,
+    filters: { hideEmpty, maxVisible, minVisible },
+  } = useRecoilValue(upsetConfigAtom);
 
   const [secondaryAccordionOpen, setSecondaryAccordionOpen] = useState(
     secondAggregateBy !== 'None',

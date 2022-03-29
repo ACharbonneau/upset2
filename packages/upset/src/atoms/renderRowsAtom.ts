@@ -1,7 +1,6 @@
 import { Intersection, Intersections } from '@visdesignlab/upset2-core';
 import { selector } from 'recoil';
 
-import { sortBySelector } from './config/sortByAtom';
 import { dimensionsSelector } from './dimensionsAtom';
 
 const firstAggRRSelector = selector<Intersections>({
@@ -21,10 +20,7 @@ const secondAggRRSelector = selector<Intersections>({
 const sortByRRSelector = selector<Intersections>({
   key: 'sort-render-row',
   get: ({ get }) => {
-    const sortBy = get(sortBySelector);
-    const rr = get(secondAggRRSelector);
-
-    return sortRows(rr, sortBy);
+    return {};
   },
 });
 

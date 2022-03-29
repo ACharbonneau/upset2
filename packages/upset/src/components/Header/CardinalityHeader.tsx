@@ -1,11 +1,11 @@
 import { css } from '@emotion/react';
 import { drag, select } from 'd3';
-import { FC, useContext, useEffect, useRef, useState } from 'react';
+import { FC, useEffect, useRef, useState } from 'react';
 import { useRecoilState, useRecoilValue } from 'recoil';
 
-import { sortBySelector } from '../../atoms/config/sortByAtom';
+import { upsetConfigAtom } from '../../atoms/config/upsetConfigAtoms';
 import { dimensionsSelector } from '../../atoms/dimensionsAtom';
-import { itemsAtom } from '../../atoms/itemsAtoms';
+import { itemsSelector } from '../../atoms/itemsAtoms';
 import { maxCardinality } from '../../atoms/maxCardinalityAtom';
 import { subsetSelector } from '../../atoms/subsetAtoms';
 import { useScale } from '../../hooks/useScale';
@@ -29,9 +29,9 @@ export const CardinalityHeader: FC = () => {
   const sliderRef = useRef<SVGRectElement>(null);
   const sliderParentRef = useRef<SVGGElement>(null);
   const dimensions = useRecoilValue(dimensionsSelector);
-  const items = useRecoilValue(itemsAtom);
+  const items = useRecoilValue(itemsSelector);
   const subsets = useRecoilValue(subsetSelector);
-  const sortBy = useRecoilValue(sortBySelector);
+  const { sortBy } = useRecoilValue(upsetConfigAtom);
 
   const itemCount = Object.keys(items).length;
   const [sliding, setSliding] = useState(false);

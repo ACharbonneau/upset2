@@ -4,7 +4,7 @@ import { Item } from '@visdesignlab/upset2-core';
 import { FC, useMemo } from 'react';
 import { useRecoilValue } from 'recoil';
 
-import { attributeAtom } from '../../atoms/attributeAtom';
+import { attributeSelector } from '../../atoms/attributeAtom';
 import { elementSelector } from '../../atoms/elementsSelectors';
 
 type Props = {
@@ -32,7 +32,7 @@ function useColumns(columns: string[]) {
 }
 
 export const ElementTable: FC<Props> = ({ id }) => {
-  const attributeColumns = useRecoilValue(attributeAtom);
+  const attributeColumns = useRecoilValue(attributeSelector);
   const elements = useRecoilValue(elementSelector(id));
   const rows = useRows(elements);
   const columns = useColumns(['_id', '_label', ...attributeColumns]);

@@ -2,7 +2,7 @@ import { Attributes } from '@visdesignlab/upset2-core';
 import { FC } from 'react';
 import { useRecoilValue } from 'recoil';
 
-import { visibleAttributesSelector } from '../atoms/config/visibleAttributes';
+import { upsetConfigAtom } from '../atoms/config/upsetConfigAtoms';
 import { dimensionsSelector } from '../atoms/dimensionsAtom';
 import translate from '../utils/transform';
 import { AttributeBar } from './AttributeBar';
@@ -13,7 +13,7 @@ type Props = {
 
 export const AttributeBars: FC<Props> = ({ attributes }) => {
   const dimensions = useRecoilValue(dimensionsSelector);
-  const visibleAttribute = useRecoilValue(visibleAttributesSelector);
+  const { visibleAttributes } = useRecoilValue(upsetConfigAtom);
 
   return (
     <g

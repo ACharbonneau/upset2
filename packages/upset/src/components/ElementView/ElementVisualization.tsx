@@ -1,6 +1,6 @@
 import { Button } from '@mui/material';
 import { Box } from '@mui/system';
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { VegaLite } from 'react-vega';
 import { useRecoilValue } from 'recoil';
 
@@ -15,7 +15,17 @@ export const ElementVisualization = () => {
   const scatterplots = useRecoilValue(scatterplotsSelector);
   const histograms = useRecoilValue(histogramSelector);
   const bookmarked = useRecoilValue(bookmarkedIntersectionSelector);
+
   const items = useRecoilValue(elementItemMapSelector(bookmarked));
+  const vegaItems = useMemo(() => {
+    return {
+      elements: Object.values(JSON.parse(JSON.stringify(items))),
+    };
+  }, [items]);
+
+  const vegaSpec = useMemo(() => {
+    return generateVega(scatterplots, histograms) as any;
+  }, [histograms, scatterplots]);
 
   const onClose = () => setOpenAddPlot(false);
 
@@ -25,13 +35,7 @@ export const ElementVisualization = () => {
       <AddPlotDialog open={openAddPlot} onClose={onClose} />
       <Box>
         {(scatterplots.length > 0 || histograms.length > 0) && (
-          <VegaLite
-            spec={generateVega(scatterplots, histograms) as any}
-            data={{
-              elements: Object.values(JSON.parse(JSON.stringify(items))),
-            }}
-            actions={false}
-          />
+          <VegaLite spec={vegaSpec} data={vegaItems} actions={false} />
         )}
       </Box>
     </Box>

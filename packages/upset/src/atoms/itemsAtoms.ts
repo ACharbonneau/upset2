@@ -1,7 +1,9 @@
 import { Items } from '@visdesignlab/upset2-core';
-import { atom } from 'recoil';
+import { selector } from 'recoil';
 
-export const itemsAtom = atom<Items>({
+import { dataAtom } from './dataAtom';
+
+export const itemsSelector = selector<Items>({
   key: 'items',
-  default: {},
+  get: ({ get }) => get(dataAtom).items,
 });

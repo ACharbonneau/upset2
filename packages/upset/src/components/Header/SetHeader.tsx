@@ -4,7 +4,7 @@ import { useRecoilValue } from 'recoil';
 
 import { dimensionsSelector } from '../../atoms/dimensionsAtom';
 import { useHoveredEntities } from '../../atoms/hoverAtom';
-import { setsAtom } from '../../atoms/setsAtoms';
+import { setsSelector } from '../../atoms/setsAtoms';
 import Group from '../custom/Group';
 import { SetLabel } from '../custom/SetLabel';
 import { SetSizeBar } from '../custom/SetSizeBar';
@@ -16,7 +16,7 @@ type Props = {
 
 export const SetHeader: FC<Props> = ({ visibleSets, scale }) => {
   const dimensions = useRecoilValue(dimensionsSelector);
-  const sets = useRecoilValue(setsAtom);
+  const sets = useRecoilValue(setsSelector);
   const hovered = useHoveredEntities();
 
   return (

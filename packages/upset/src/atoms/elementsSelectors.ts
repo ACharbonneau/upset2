@@ -2,7 +2,7 @@ import { Item } from '@visdesignlab/upset2-core';
 import { selectorFamily } from 'recoil';
 
 import { bookmarkedColorPalette, currentIntersectionAtom, nextColorSelector } from './config/currentIntersectionAtom';
-import { itemsAtom } from './itemsAtoms';
+import { itemsSelector } from './itemsAtoms';
 import { flattenedOnlyRows } from './renderRowsAtom';
 
 export const elementSelector = selectorFamily<Item[], string>({
@@ -10,7 +10,7 @@ export const elementSelector = selectorFamily<Item[], string>({
   get:
     (id: string) =>
     ({ get }) => {
-      const items = get(itemsAtom);
+      const items = get(itemsSelector);
       const intersections = get(flattenedOnlyRows);
       const row = intersections[id];
       const palette = get(bookmarkedColorPalette);

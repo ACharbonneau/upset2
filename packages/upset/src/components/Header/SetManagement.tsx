@@ -2,7 +2,7 @@ import { FC, useState } from 'react';
 import { a, useSpring } from 'react-spring';
 import { useRecoilValue, useSetRecoilState } from 'recoil';
 
-import { hiddenSetSortAtom } from '../../atoms/config/visibleSetsAtoms';
+import { hiddenSetSortAtom } from '../../atoms/config/setManagementAtoms';
 import { dimensionsSelector } from '../../atoms/dimensionsAtom';
 import translate from '../../utils/transform';
 import { AttributeDialog } from '../custom/AttributeDialog';

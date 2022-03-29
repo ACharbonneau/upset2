@@ -1,4 +1,4 @@
-import { isRowAggregate, Row } from '@visdesignlab/upset2-core';
+import { Intersection, isIntersectionAggregate } from '@visdesignlab/upset2-core';
 import React, { FC } from 'react';
 import { a, useTransition } from 'react-spring';
 import { useRecoilValue } from 'recoil';
@@ -13,8 +13,8 @@ type Props = {
   rows: RenderRow[];
 };
 
-export function rowRenderer(row: Row) {
-  if (isRowAggregate(row)) {
+export function rowRenderer(row: Intersection) {
+  if (isIntersectionAggregate(row)) {
     return <AggregateRow aggregateRow={row} />;
   }
   return <SubsetRow subset={row} />;

@@ -1,12 +1,11 @@
-/** @jsxImportSource @emotion/react */
-import { useContext } from 'react';
 import { a, useTransition } from 'react-spring';
 import { useRecoilValue } from 'recoil';
 
-import { hiddenSetSelector, visibleSetSelector } from '../../atoms/config/visibleSetsAtoms';
+import { hiddenSetSelector } from '../../atoms/config/setManagementAtoms';
+import { upsetConfigAtom } from '../../atoms/config/upsetConfigAtoms';
 import { dimensionsSelector } from '../../atoms/dimensionsAtom';
 import { maxSetSizeSelector } from '../../atoms/maxSetSizeSelector';
-import { setsAtom } from '../../atoms/setsAtoms';
+import { setsSelector } from '../../atoms/setsAtoms';
 import { useScale } from '../../hooks/useScale';
 import { useProvenance } from '../../provenance';
 import translate from '../../utils/transform';
@@ -15,10 +14,11 @@ import { SetSizeBar } from '../custom/SetSizeBar';
 import { SetHeader } from './SetHeader';
 import { SetManagement } from './SetManagement';
 
+/** @jsxImportSource @emotion/react */
 export const MatrixHeader = () => {
   const { actions } = useProvenance();
-  const sets = useRecoilValue(setsAtom);
-  const visibleSets = useRecoilValue(visibleSetSelector);
+  const sets = useRecoilValue(setsSelector);
+  const { visibleSets } = useRecoilValue(upsetConfigAtom);
   const dimensions = useRecoilValue(dimensionsSelector);
   const maxCarinality = useRecoilValue(maxSetSizeSelector);
   const { set } = dimensions;

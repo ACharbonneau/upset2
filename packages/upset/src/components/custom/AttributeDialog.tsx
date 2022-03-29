@@ -1,4 +1,3 @@
-/** @jsxImportSource @emotion/react */
 import AddIcon from '@mui/icons-material/Add';
 import RemoveIcon from '@mui/icons-material/Remove';
 import {
@@ -22,10 +21,11 @@ import { TransitionProps } from '@mui/material/transitions';
 import { FC, forwardRef, ReactElement, Ref, useContext, useState } from 'react';
 import { useRecoilValue } from 'recoil';
 
-import { attributeAtom } from '../../atoms/attributeAtom';
-import { visibleAttributesSelector } from '../../atoms/config/visibleAttributes';
+import { attributeSelector } from '../../atoms/attributeAtom';
+import { upsetConfigAtom } from '../../atoms/config/upsetConfigAtoms';
 import { useProvenance } from '../../provenance';
 
+/** @jsxImportSource @emotion/react */
 const Transition = forwardRef(function Transition(
   props: TransitionProps & {
     children: ReactElement<any, any>;
@@ -42,8 +42,8 @@ type Props = {
 
 export const AttributeDialog: FC<Props> = ({ open, onClose }) => {
   const { actions } = useProvenance();
-  const attributes = useRecoilValue(attributeAtom);
-  const visibleAttributes = useRecoilValue(visibleAttributesSelector);
+  const attributes = useRecoilValue(attributeSelector);
+  const { visibleAttributes } = useRecoilValue(upsetConfigAtom);
 
   const [currentlySelectedAttributes, setCurrentlySelectedAttributes] =
     useState(() => visibleAttributes);

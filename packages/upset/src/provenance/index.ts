@@ -1,10 +1,9 @@
 import { createAction, initProvenance } from '@visdesignlab/trrack';
 import { AggregateBy, Plot, SortBy, UpsetConfig } from '@visdesignlab/upset2-core';
-import { useMemo, useState } from 'react';
-import { useRecoilState } from 'recoil';
+import { useContext } from 'react';
 
 import { defaultConfig } from '../atoms/config/upsetConfigAtoms';
-import { upsetConfigAtom } from './../atoms/config/upsetConfigAtoms';
+import { ProvenanceContext } from '../components/Root';
 
 export type Events = 'Test';
 
@@ -192,6 +191,8 @@ const removePlotAction = createAction<UpsetConfig, [Plot], Events>(
 export function initializeProvenanceTracking(
   config: Partial<UpsetConfig> = {},
   setter?: (state: UpsetConfig) => void,
+  rootSetter?: (is: boolean) => void,
+  latestSetter?: (is: boolean) => void,
 ) {
   const finalConfig: UpsetConfig = { ...defaultConfig, ...config };
   const provenance = initProvenance<UpsetConfig, Events, Metadata>(
@@ -201,12 +202,13 @@ export function initializeProvenanceTracking(
     },
   );
 
-  if (setter) {
-    provenance.addGlobalObserver(() => {
-      console.log('Setting', provenance.root.id);
-      setter(provenance.state);
-    });
-  }
+  provenance.addGlobalObserver(() => {
+    if (setter) setter(provenance.state);
+
+    if (rootSetter) rootSetter(provenance.current.id === provenance.root.id);
+
+    if (latestSetter) latestSetter(provenance.current.children.length === 0);
+  });
 
   provenance.done();
 
@@ -214,18 +216,7 @@ export function initializeProvenanceTracking(
 }
 
 export function useProvenance() {
-  const [config, setConfig] = useRecoilState(upsetConfigAtom);
-
-  return useMemo(() => {
-    const provenance = initializeProvenanceTracking(
-      config,
-      setConfig,
-    );
-    const actions = getActions(provenance);
-    console.log('Run In', provenance.root.id);
-
-    return { provenance, actions };
-  }, []);
+  return useContext(ProvenanceContext);
 }
 
 export type UpsetProvenance = ReturnType<typeof initializeProvenanceTracking>;

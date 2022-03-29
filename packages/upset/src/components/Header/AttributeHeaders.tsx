@@ -1,13 +1,13 @@
 import { useRecoilValue } from 'recoil';
 
-import { visibleAttributesSelector } from '../../atoms/config/visibleAttributes';
+import { upsetConfigAtom } from '../../atoms/config/upsetConfigAtoms';
 import { dimensionsSelector } from '../../atoms/dimensionsAtom';
 import translate from '../../utils/transform';
 import { AttributeHeader } from './AttributeHeader';
 
 export const AttributeHeaders = () => {
   const dimensions = useRecoilValue(dimensionsSelector);
-  const visibleAttribute = useRecoilValue(visibleAttributesSelector);
+  const { visibleAttributes } = useRecoilValue(upsetConfigAtom);
 
   return (
     <g
@@ -21,7 +21,7 @@ export const AttributeHeaders = () => {
         dimensions.header.totalHeight - dimensions.attribute.height,
       )}
     >
-      {visibleAttribute.map((attribute, idx) => {
+      {visibleAttributes.map((attribute, idx) => {
         return (
           <g
             key={attribute}
