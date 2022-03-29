@@ -1,7 +1,7 @@
 /** @jsxImportSource @emotion/react */
 import { useRecoilValue, useSetRecoilState } from 'recoil';
 
-import { visibleSetSelector } from '../atoms/config/visibleSetsAtoms';
+import { visibleSetSelector } from '../atoms/config/setManagementAtoms';
 import { dimensionsSelector } from '../atoms/dimensionsAtom';
 import { columnHoverAtom, rowHoverAtom } from '../atoms/hoverAtom';
 import { flattenedRowsSelector } from '../atoms/renderRowsAtom';

@@ -2,7 +2,7 @@
 import { css } from '@emotion/react';
 import { useRecoilValue } from 'recoil';
 
-import { visibleSetSelector } from '../atoms/config/visibleSetsAtoms';
+import { visibleSetSelector } from '../atoms/config/setManagementAtoms';
 import { dimensionsSelector } from '../atoms/dimensionsAtom';
 import { useHoveredEntities } from '../atoms/hoverAtom';
 import { flattenedRowsSelector } from '../atoms/renderRowsAtom';
