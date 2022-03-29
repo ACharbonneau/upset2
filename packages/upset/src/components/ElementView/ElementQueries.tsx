@@ -12,10 +12,10 @@ import {
   nextColorSelector,
 } from '../../atoms/config/currentIntersectionAtom';
 import { flattenedOnlyRows } from '../../atoms/renderRowsAtom';
-import { ProvenanceContext } from '../Root';
+import { useProvenance } from '../../provenance';
 
 export const ElementQueries = () => {
-  const { actions } = useContext(ProvenanceContext);
+  const { actions } = useProvenance();
   const [currentIntersection, setCurrentIntersection] = useRecoilState(
     currentIntersectionAtom,
   );

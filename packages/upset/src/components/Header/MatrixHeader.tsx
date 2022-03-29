@@ -8,15 +8,15 @@ import { dimensionsSelector } from '../../atoms/dimensionsAtom';
 import { maxSetSizeSelector } from '../../atoms/maxSetSizeSelector';
 import { setsAtom } from '../../atoms/setsAtoms';
 import { useScale } from '../../hooks/useScale';
+import { useProvenance } from '../../provenance';
 import translate from '../../utils/transform';
 import Group from '../custom/Group';
 import { SetSizeBar } from '../custom/SetSizeBar';
-import { ProvenanceContext } from '../Root';
 import { SetHeader } from './SetHeader';
 import { SetManagement } from './SetManagement';
 
 export const MatrixHeader = () => {
-  const { actions } = useContext(ProvenanceContext);
+  const { actions } = useProvenance();
   const sets = useRecoilValue(setsAtom);
   const visibleSets = useRecoilValue(visibleSetSelector);
   const dimensions = useRecoilValue(dimensionsSelector);

@@ -4,10 +4,9 @@ import { createContext, FC, useEffect, useMemo } from 'react';
 import { useRecoilState, useSetRecoilState } from 'recoil';
 
 import { attributeAtom } from '../atoms/attributeAtom';
-import { upsetConfigAtom } from '../atoms/config/upsetConfigAtoms';
 import { itemsAtom } from '../atoms/itemsAtoms';
 import { setsAtom } from '../atoms/setsAtoms';
-import { getActions, initializeProvenanceTracking, UpsetActions, UpsetProvenance } from '../provenance';
+import { UpsetActions, UpsetProvenance, useProvenance } from '../provenance';
 import { Body } from './Body';
 import { ElementSidebar } from './ElementView/ElementSidebar';
 import { Header } from './Header/Header';
@@ -15,11 +14,6 @@ import { Sidebar } from './Sidebar';
 import { SvgBase } from './SvgBase';
 
 /** @jsxImportSource @emotion/react */
-export const ProvenanceContext = createContext<{
-  provenance: UpsetProvenance;
-  actions: UpsetActions;
-}>(undefined!);
-
 const baseStyle = css`
   padding: 0.25em;
 `;
@@ -34,29 +28,11 @@ type Props = {
   yOffset: number;
 };
 
-export const Root: FC<Props> = ({ data, config, extProvenance, yOffset }) => {
-  // Get setter for recoil config atom
-  const setState = useSetRecoilState(upsetConfigAtom);
-
-  useEffect(() => {
-    setState(config);
-  }, []);
-
-  // Initialize Provenance and pass it setter to connect
-  const { provenance, actions } = useMemo(() => {
-    if (extProvenance) {
-      const { provenance, actions } = extProvenance;
-
-      provenance.addGlobalObserver(() => setState(provenance.state));
-
-      provenance.done();
-      return { provenance, actions };
-    }
-
-    const provenance = initializeProvenanceTracking(config, setState);
-    const actions = getActions(provenance);
-    return { provenance, actions };
-  }, [config]);
+export const Root: FC<Props> = ({ data, config, yOffset }) => {
+  const { provenance } = useProvenance();
+  (window.parent.window as any).provenace = () => {
+    console.table(JSON.parse(JSON.stringify(provenance.graph.nodes)));
+  };
 
   const [sets, setSets] = useRecoilState(setsAtom);
   const [items, setItems] = useRecoilState(itemsAtom);
@@ -73,7 +49,7 @@ export const Root: FC<Props> = ({ data, config, extProvenance, yOffset }) => {
     return null;
 
   return (
-    <ProvenanceContext.Provider value={{ provenance, actions }}>
+    <>
       <div
         css={css`
           flex: 0 0 auto;
@@ -96,6 +72,6 @@ export const Root: FC<Props> = ({ data, config, extProvenance, yOffset }) => {
         </SvgBase>
       </div>
       <ElementSidebar yOffset={yOffset} />
-    </ProvenanceContext.Provider>
+    </>
   );
 };

@@ -1,7 +1,10 @@
 import { createAction, initProvenance } from '@visdesignlab/trrack';
 import { AggregateBy, Plot, SortBy, UpsetConfig } from '@visdesignlab/upset2-core';
+import { useMemo, useState } from 'react';
+import { useRecoilState } from 'recoil';
 
 import { defaultConfig } from '../atoms/config/upsetConfigAtoms';
+import { upsetConfigAtom } from './../atoms/config/upsetConfigAtoms';
 
 export type Events = 'Test';
 
@@ -199,12 +202,30 @@ export function initializeProvenanceTracking(
   );
 
   if (setter) {
-    provenance.addGlobalObserver(() => setter(provenance.state));
+    provenance.addGlobalObserver(() => {
+      console.log('Setting', provenance.root.id);
+      setter(provenance.state);
+    });
   }
 
   provenance.done();
 
   return provenance;
+}
+
+export function useProvenance() {
+  const [config, setConfig] = useRecoilState(upsetConfigAtom);
+
+  return useMemo(() => {
+    const provenance = initializeProvenanceTracking(
+      config,
+      setConfig,
+    );
+    const actions = getActions(provenance);
+    console.log('Run In', provenance.root.id);
+
+    return { provenance, actions };
+  }, []);
 }
 
 export type UpsetProvenance = ReturnType<typeof initializeProvenanceTracking>;

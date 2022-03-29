@@ -1,50 +1,35 @@
-import { Aggregates, areRowsSubsets, Intersections, Intersections } from './types';
-import { deepCopy } from './utils';
+import { getDegreeFromSetMembership, Intersection, isIntersectionAggregate, isIntersectionSubset } from './types';
 
-function filterIntersections<T extends Intersections>(
-  rows: T,
-  filters: { maxVisible: number; minVisible: number; hideEmpty: boolean },
-) {
-  const { values, order } = rows;
+type FilterConfig = {
+  maxVisible: number;
+  minVisible: number;
+  hideEmpty: boolean;
+};
 
-  const newOrder = order.filter((id) => {
-    let shouldKeep = true;
+export function filterIntersection(
+  intersection: Intersection,
+  config: Partial<FilterConfig>,
+): boolean {
+  const { maxVisible = 3, minVisible = 0, hideEmpty = false } = config;
 
-    if (filters.hideEmpty) {
-      shouldKeep = values[id].size > 0;
-    }
+  if (hideEmpty && intersection.size === 0) return true;
 
-    return shouldKeep;
-  });
+  const degree = getDegreeFromSetMembership(intersection.setMembership);
 
-  const newValues: typeof values = {};
+  let shouldFilter = false;
 
-  newOrder.forEach((id) => {
-    newValues[id] = values[id];
-  });
-
-  return { values: newValues, order: newOrder };
-}
-
-export function filterRows(
-  baseRows: Intersections,
-  filters: { maxVisible: number; minVisible: number; hideEmpty: boolean },
-): Intersections {
-  const rows = deepCopy(baseRows);
-
-  if (areRowsSubsets(rows)) {
-    return filterIntersections(rows, filters);
+  if (isIntersectionSubset(intersection)) {
+    shouldFilter = degree < minVisible || degree > maxVisible;
   }
 
-  const aggs: Aggregates = filterIntersections(rows as any, filters) as any;
+  if (isIntersectionAggregate(intersection)) {
+    if (
+      intersection.aggregateBy === 'Degree' ||
+      intersection.aggregateBy === 'Overlaps'
+    ) {
+      shouldFilter = degree < minVisible || degree > maxVisible;
+    }
+  }
 
-  aggs.order.forEach((aggId) => {
-    const { items } = aggs.values[aggId];
-
-    const newItems = filterRows(items, filters);
-
-    aggs.values[aggId].items = newItems;
-  });
-
-  return aggs;
+  return shouldFilter;
 }

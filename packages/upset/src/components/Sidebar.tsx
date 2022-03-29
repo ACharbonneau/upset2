@@ -26,11 +26,11 @@ import {
 import { hideEmptySelector, maxVisibleSelector, minVisibleSelector } from '../atoms/config/filterAtoms';
 import { sortBySelector } from '../atoms/config/sortByAtom';
 import { visibleSetSelector } from '../atoms/config/visibleSetsAtoms';
-import { ProvenanceContext } from './Root';
+import { useProvenance } from '../provenance';
 
 /** @jsxImportSource @emotion/react */
 export const Sidebar = () => {
-  const { actions } = useContext(ProvenanceContext);
+  const { actions } = useProvenance();
   const visibleSets = useRecoilValue(visibleSetSelector);
   const firstAggregateBy = useRecoilValue(firstAggregateSelector);
   const firstOverlapDegree = useRecoilValue(firstOvelapDegreeSelector);

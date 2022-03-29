@@ -9,9 +9,9 @@ import { itemsAtom } from '../../atoms/itemsAtoms';
 import { maxCardinality } from '../../atoms/maxCardinalityAtom';
 import { subsetSelector } from '../../atoms/subsetAtoms';
 import { useScale } from '../../hooks/useScale';
+import { useProvenance } from '../../provenance';
 import translate from '../../utils/transform';
 import { Axis } from '../Axis';
-import { ProvenanceContext } from '../Root';
 
 /** @jsxImportSource @emotion/react */
 const hide = css`
@@ -25,7 +25,7 @@ const show = css`
 `;
 
 export const CardinalityHeader: FC = () => {
-  const { actions } = useContext(ProvenanceContext);
+  const { actions } = useProvenance();
   const sliderRef = useRef<SVGRectElement>(null);
   const sliderParentRef = useRef<SVGGElement>(null);
   const dimensions = useRecoilValue(dimensionsSelector);
@@ -39,7 +39,7 @@ export const CardinalityHeader: FC = () => {
 
   useEffect(() => {
     if (maxC !== -1) return;
-    const subs = Object.values(subsets.values);
+    const subs = Object.values(subsets);
     if (subs.length === 0) return;
 
     const cardinalities = subs.map((s) => s.size);
