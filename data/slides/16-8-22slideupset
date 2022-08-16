@@ -1,0 +1,13 @@
+{
+	"file": "slides/16-8-22slideupset.csv",
+	"name": "CDA-all",
+	"header": 0,
+	"separator": ",",
+	"skip": 0,
+	"meta": [
+		{ "type": "id", "index": 0, "name": "Subject" }
+	],
+	"sets": [
+		{ "format": "binary", "start": 1, "end": 68 }
+	]
+}
