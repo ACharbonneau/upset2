@@ -1,3 +1,14 @@
 [
-  "data/slides/16-8-22slideupset.json"
+  "data/slides/16-8-22slideupset.json",
+   "data/simpsons/simpsons.json",
+  "data/fruit/fruit.json",
+
+  "data/mutations/mutations20.json",
+
+  "data/compounds/comp-protein.json",
+  "data/compounds/comp-family.json",
+
+  "data/countries/countries.json",
+
+  "data/socialgraph/socialgraph.json"
 ]
